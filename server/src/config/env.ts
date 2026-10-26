@@ -28,9 +28,8 @@ const envSchema = z.object({
     })
     .min(16, 'JWT_SECRET must be at least 16 characters long for security.'),
   CORS_ORIGIN: z
-    .string({
-      required_error: 'CORS_ORIGIN is required.',
-    })
+    .string()
+    .default('http://localhost:5173,http://127.0.0.1:5173')
     .transform((val) =>
       val
         .split(',')

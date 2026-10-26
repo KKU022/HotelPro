@@ -410,40 +410,49 @@ The sign-in interface includes convenient **One-Click Quick-Fill** buttons for r
 
 ---
 
-## 🌐 Deployment Guide
+## 🌐 Deployment Guide (Unified Single Vercel Project)
 
-HotelPro is optimized for zero-cost decoupled deployment:
+HotelPro is architected to deploy as **ONE single Vercel project from the repository root under ONE domain**:
 
 ```mermaid
 graph LR
-    User((Guest / Admin)) -->|"HTTPS (hotelpro.vercel.app)"| Vercel["⚡ Vercel (Frontend SPA)"]
-    Vercel -->|"HTTPS API Calls (/api/*)"| Render["🚀 Render (Express Web Service)"]
-    Render -->|"TLS Mongoose Connection"| Atlas[("🍃 MongoDB Atlas (Cluster 0)")]
+    User((Guest / Admin)) -->|"HTTPS (hotelpro.vercel.app)"| VercelEdge["⚡ Vercel Edge Network"]
+    VercelEdge -->|"/sanctuaries/*, /assets/*, /index.html"| StaticCDN["📦 Static Assets (client/dist)"]
+    VercelEdge -->|"/api/* (Rewrites to api/index.ts)"| Serverless["⚡ Express Serverless Function (api/index.ts)"]
+    Serverless -->|"Cached Mongoose Connection"| Atlas[("🍃 MongoDB Atlas (Cluster 0)")]
 ```
 
-### 1. Backend Service (Render)
-- **Repository**: `https://github.com/KKU022/HotelPro.git`
-- **Root Directory**: `server`
-- **Build Command**: `npm install && npm run build`
-- **Start Command**: `npm start`
-- **Environment Variables**:
-  - `NODE_ENV`: `production`
-  - `PORT`: `10000`
-  - `MONGO_URI`: `mongodb+srv://...`
-  - `JWT_SECRET`: `<secure-key>`
-  - `CORS_ORIGIN`: `https://your-hotelpro-frontend.vercel.app`
-  - `GOOGLE_CLIENT_ID`: `your-id.apps.googleusercontent.com`
+### 1. Import Repository into Vercel
+1. Go to your [Vercel Dashboard](https://vercel.com/new).
+2. Click **Import** next to **`KKU022/HotelPro`**.
+3. **Project Configuration Settings:**
+   - **Root Directory:** Leave empty / default (`./`) — *Do NOT select `client` or `server`!*
+   - **Framework Preset:** `Vite`
+   - **Build Command:** `npm run build` (or leave default)
+   - **Output Directory:** `client/dist`
 
-### 2. Frontend Client (Vercel)
-- **Repository**: `https://github.com/KKU022/HotelPro.git`
-- **Framework Preset**: `Vite`
-- **Root Directory**: `client`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Environment Variables**:
-  - `VITE_API_URL`: `https://your-hotelpro-backend.onrender.com/api`
-  - `VITE_GOOGLE_CLIENT_ID`: `your-id.apps.googleusercontent.com`
-- **SPA Deep Linking**: Covered by `client/vercel.json` rewrites.
+### 2. Configure Environment Variables in Vercel
+Under the **Environment Variables** section in the Vercel import screen, add:
+
+| Variable Name | Required | Example / Description |
+| :--- | :---: | :--- |
+| `MONGO_URI` | **Yes** | `mongodb+srv://<user>:<password>@cluster0.irklf1p.mongodb.net/HotelPro?retryWrites=true&w=majority` |
+| `JWT_SECRET` | **Yes** | `<secure-random-key-at-least-16-characters>` |
+| `NODE_ENV` | **Yes** | `production` |
+| `GOOGLE_CLIENT_ID` | Optional | `19506291359-xxxxxx.apps.googleusercontent.com` (for server verification) |
+| `VITE_GOOGLE_CLIENT_ID`| Optional | `19506291359-xxxxxx.apps.googleusercontent.com` (for frontend client) |
+| `CORS_ORIGIN` | Optional | Defaults to same-origin and all `*.vercel.app` preview domains automatically |
+| `VITE_API_URL` | Optional | Defaults to same-origin relative `/api` automatically in production |
+
+### 3. Google Cloud Console Configuration
+Under your OAuth 2.0 Web Client in [Google Cloud Console](https://console.cloud.google.com/):
+- **Authorized JavaScript origins:**
+  - `http://localhost:5173` (local development)
+  - `https://your-project-name.vercel.app` (your actual Vercel domain)
+- **Authorized redirect URIs:** *Not required* (Google Identity Services uses client-side popup postMessage callback).
+
+### 4. Deploy!
+Click **Deploy**. Vercel will install dependencies via workspaces, compile both backend and frontend, expose static assets from `client/dist`, and route `/api/*` to the Express Serverless Function under your single production domain.
 
 ---
 

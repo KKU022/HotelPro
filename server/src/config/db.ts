@@ -2,8 +2,21 @@ import mongoose from 'mongoose';
 import { env } from './env';
 
 let isConnected = false;
+let connectionPromise: Promise<typeof mongoose> | null = null;
 
 export const connectDatabase = async (): Promise<void> => {
+  // If already connected, return immediately
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return;
+  }
+
+  // Await existing in-flight connection to prevent duplicate connection attempts
+  if (mongoose.connection.readyState === 2 && connectionPromise) {
+    await connectionPromise;
+    return;
+  }
+
   if (!env.MONGO_URI) {
     console.warn('⚠️  MONGO_URI is not set. Database connection skipped.');
     return;
@@ -11,13 +24,15 @@ export const connectDatabase = async (): Promise<void> => {
 
   try {
     mongoose.set('strictQuery', true);
-    await mongoose.connect(env.MONGO_URI, {
+    connectionPromise = mongoose.connect(env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
     });
+    await connectionPromise;
     isConnected = true;
-    console.log('✅ Connected to MongoDB successfully.');
+    console.log('✅ Connected to MongoDB Atlas successfully.');
   } catch (error) {
     isConnected = false;
+    connectionPromise = null;
     console.error('❌ Failed to connect to MongoDB:', error);
   }
 };

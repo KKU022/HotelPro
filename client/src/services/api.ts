@@ -1,4 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// In production on Vercel, requests use same-origin relative '/api' unless overridden.
+// In local development, falls back to 'http://localhost:5000/api'.
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
+    ? import.meta.env.VITE_API_URL
+    : (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 export interface ApiError {
   message: string;

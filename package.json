@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "HotelPro — Boutique Luxury Hotel & Sanctuary Reservation System",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"SERVER,CLIENT\" --prefix-colors \"bgBlue.bold,bgMagenta.bold\" \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm --prefix server run dev",
@@ -13,7 +17,23 @@
     "install:all": "npm install && npm --prefix server install && npm --prefix client install",
     "seed": "npm --prefix server run seed -- --confirm"
   },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "google-auth-library": "^11.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "zod": "^3.24.2"
+  },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.10.7",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
   }
 }
