@@ -1,0 +1,19 @@
+{
+  "name": "hotelpro-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HotelPro — Boutique Luxury Hotel & Sanctuary Reservation System",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"SERVER,CLIENT\" --prefix-colors \"bgBlue.bold,bgMagenta.bold\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "seed": "npm --prefix server run seed -- --confirm"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
